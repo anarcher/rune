@@ -260,6 +260,6 @@ replace github.com/go-git/go-git/v6 => github.com/unstablebuild/go-git/v6 v6.0.1
 
 replace github.com/tree-sitter/go-tree-sitter => github.com/unstablebuild/go-tree-sitter v0.25.0-ub.2
 
-replace github.com/hajimehoshi/ebiten/v2 => github.com/anarcher/ebiten/v2 v2.7.6-0.20261114090653-35bfe787bdab
+replace github.com/hajimehoshi/ebiten/v2 => github.com/anarcher/ebiten/v2 v2.7.6-0.20261114092536-92c838067730
 
 replace github.com/google/codesearch => github.com/unstablebuild/codesearch v1.4.0-ub.1
