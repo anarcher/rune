@@ -635,7 +635,7 @@ func (r *renderer) renderRow(
 				stroke = tcellToColor(u, fg, r.fgOpacity)
 			}
 			r.rectBatch.AddStroke(float32(pixelX), float32(underlinePixelY),
-				float32(pixelX+r.font.CellSize.X),
+				float32(pixelX+r.font.CellSize.X*math.Max(1, float64(cell.Width))),
 				float32(underlinePixelY), 2, stroke)
 		}
 

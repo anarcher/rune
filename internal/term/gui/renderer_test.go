@@ -18,6 +18,8 @@ package gui
 
 import (
 	"image/color"
+	"math"
+	"reflect"
 	"strconv"
 	"testing"
 
@@ -151,4 +153,16 @@ func benchmarkRenderLigatures(b *testing.B, pixelsWidth, pixelsHeight int) {
 			handleLigatures(drawer, cells, 5, 10, font.Regular, colorBlack, font, image)
 		}
 	}
+}
+
+func TestRendererWideUnderline(t *testing.T) {
+	r, _, _ := newTestRenderer(t, 4, 1)
+	t.Cleanup(r.deallocate)
+	r.renderRow(r.frame, [][]term.Cell{{{Ch: ' ', Width: 2, Attrs: term.AttrUnderline}, {}}}, 0, passRects)
+	vertices := reflect.ValueOf(&r.rectBatch).Elem().FieldByName("vertices")
+	right := math.Inf(-1)
+	for i := 0; i < vertices.Len(); i++ {
+		right = max(right, vertices.Index(i).FieldByName("DstX").Float())
+	}
+	assert.InDelta(t, r.font.CellSize.X*2, right, 0.01)
 }

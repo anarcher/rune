@@ -41,3 +41,5 @@ func (e ebitenInputManager) CursorPosition() (int, int) {
 func (e ebitenInputManager) IsMouseButtonPressed(button ebiten.MouseButton) bool {
 	return ebiten.IsMouseButtonPressed(button)
 }
+
+func (e ebitenInputManager) IsFocused() bool { return ebiten.IsFocused() }

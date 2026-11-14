@@ -398,8 +398,15 @@ func (g *GUI) render(screen *ebiten.Image) {
 	if g.links.armed() {
 		cells = g.links.overlay(cells)
 	}
-	g.renderer.Draw(screen, cells, g.writer.Images(), g.cursor.show,
-		g.cursor.pos, g.cursor.style)
+	cells, caret, composing := g.input.preedit.overlay(cells)
+	pos, style, show := g.cursor.pos, g.cursor.style, g.cursor.show
+	if composing {
+		pos, style, show = caret, term.CursorStyleSteadyBar, true
+	}
+	g.renderer.Draw(screen, cells, g.writer.Images(), show, pos, style)
+	if g.input.preedit.validAnchor(cells) {
+		ebiten.SetIMECaretRect(g.CellRect(caret.X, caret.Y, 1, 1))
+	}
 	if g.printFPS {
 		ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f", ebiten.ActualFPS()))
 	}
@@ -562,6 +569,9 @@ func (g *GUI) Update() error {
 	g.started.Store(true)
 	g.pendingEvents = append(g.pendingEvents, g.mouse.processMouse()...)
 	g.pendingEvents = g.input.processEvents(g.pendingEvents)
+	if g.input.compositionChanged {
+		g.needsRender = true
+	}
 	g.pendingEvents = append(g.pendingEvents, g.processWindowClosed()...)
 	needsDraw := g.needsDraw
 
@@ -934,6 +944,7 @@ func (g *GUI) drawHandler(ctx context.Context) {
 	_ = g.writer.Clear(g.defaultAttr)
 	g.handler.Draw(g.writer)
 	g.cursor.pos, g.cursor.style, g.cursor.show = g.handler.Cursor()
+	g.input.preedit.setAnchor(g.cursor.pos, g.cursor.show)
 	g.hasContent = true
 	g.needsDraw = false
 	g.needsRender = true

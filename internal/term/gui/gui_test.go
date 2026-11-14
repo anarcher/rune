@@ -1465,3 +1465,32 @@ func (m *mockHandler) Cursor() (c term.Coordinates, s term.CursorStyle, show boo
 func (m *mockHandler) Selection() (string, bool) {
 	return "", false
 }
+
+func TestUpdateCompositionWithoutHandlerEvent(t *testing.T) {
+	draws, events := 0, 0
+	g, mock := newTestGUI(t, &mockHandler{
+		assertDraw:  func(term.Writer) { draws++ },
+		assertEvent: func(term.Event) (bool, bool) { events++; return false, true },
+	})
+	require.NoError(t, g.Update())
+	draws = 0
+	g.needsRender = false
+	mock.events = []ebiten.InputEvent{{Kind: ebiten.InputEventKindComposition, Composition: "글", SelectionEnd: 3}}
+	require.NoError(t, g.Update())
+	assert.True(t, g.NeedsRender())
+	assert.Zero(t, draws)
+	assert.Zero(t, events)
+	g.needsRender = false
+	require.NoError(t, g.Update())
+	assert.False(t, g.NeedsRender())
+	mock.events[0].SelectionEnd = 0
+	require.NoError(t, g.Update())
+	assert.True(t, g.NeedsRender())
+	g.needsRender = false
+	mock.unfocused = true
+	mock.events = nil
+	require.NoError(t, g.Update())
+	assert.True(t, g.NeedsRender())
+	assert.Empty(t, g.input.preedit.text)
+	assert.Zero(t, events)
+}

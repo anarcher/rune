@@ -27,6 +27,7 @@ import (
 // abstracts ebiten* input methods
 type keysManager interface {
 	AppendInputEvents([]ebiten.InputEvent) []ebiten.InputEvent
+	IsFocused() bool
 }
 
 // claimedSourceHistory bounds how many key actions Rune remembers claiming.
@@ -38,13 +39,15 @@ type keysManager interface {
 const claimedSourceHistory = 64
 
 type input struct {
-	fontManager *font.Manager
-	events      []ebiten.InputEvent
-	claimed     map[ebiten.InputSource]term.Key
-	claimOrder  []ebiten.InputSource
-	input       keysManager
-	keyMapping  map[ebiten.KeyEvent]ebiten.KeyEvent
-	modMapping  map[ebiten.KeyModifier]ebiten.KeyModifier
+	fontManager        *font.Manager
+	preedit            preedit
+	compositionChanged bool
+	events             []ebiten.InputEvent
+	claimed            map[ebiten.InputSource]term.Key
+	claimOrder         []ebiten.InputSource
+	input              keysManager
+	keyMapping         map[ebiten.KeyEvent]ebiten.KeyEvent
+	modMapping         map[ebiten.KeyModifier]ebiten.KeyModifier
 	// metaDown tracks whether Meta/Super is held. It is derived from key
 	// transitions rather than ebiten.IsKeyPressed, which always reports
 	// false on GLFW desktop platforms.
@@ -153,6 +156,23 @@ func (i *input) remapMods(mods ebiten.KeyModifier) ebiten.KeyModifier {
 // pending IME text. Text without an originating key action is forwarded untouched.
 func (i *input) processEvents(dst []term.Event) []term.Event {
 	i.events = i.input.AppendInputEvents(i.events[:0])
+	i.compositionChanged = false
+	// Composition observations must not interrupt the named-key lookahead:
+	// a clear can sit between Enter and the text that Enter committed.
+	n := 0
+	for _, ev := range i.events {
+		if ev.Kind == ebiten.InputEventKindComposition {
+			i.compositionChanged = i.preedit.set(ev.Composition, ev.SelectionStart, ev.SelectionEnd) || i.compositionChanged
+			continue
+		}
+		i.events[n] = ev
+		n++
+	}
+	clear(i.events[n:])
+	i.events = i.events[:n]
+	if !i.input.IsFocused() {
+		i.compositionChanged = i.preedit.set("", 0, 0) || i.compositionChanged
+	}
 
 	for n := 0; n < len(i.events); n++ {
 		ev := i.events[n]

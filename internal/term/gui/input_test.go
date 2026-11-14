@@ -1337,7 +1337,8 @@ func newTestInput(t *testing.T) (*mockInputManager, *input) {
 }
 
 type mockInputManager struct {
-	events []ebiten.InputEvent
+	unfocused bool
+	events    []ebiten.InputEvent
 }
 
 func (m *mockInputManager) AppendInputEvents(buf []ebiten.InputEvent) []ebiten.InputEvent {
@@ -1626,4 +1627,71 @@ func TestResolveCharKeyStripsShift(t *testing.T) {
 			assert.Equal(t, tc.mod, mod)
 		})
 	}
+}
+
+func TestInputComposition(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		key  ebiten.Key
+		mods []ebiten.KeyModifier
+	}{
+		{"enter", ebiten.KeyEnter, nil}, {"space", ebiten.KeySpace, nil},
+		{"shift enter", ebiten.KeyEnter, []ebiten.KeyModifier{ebiten.KeyModShift}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			mock, in := newTestInput(t)
+			mock.events = []ebiten.InputEvent{{Kind: ebiten.InputEventKindComposition, Composition: "글", SelectionEnd: len("글")}}
+			require.Empty(t, in.processEvents(nil))
+			assert.Equal(t, "글", in.preedit.text)
+			assert.True(t, in.compositionChanged)
+			in.processEvents(nil)
+			assert.False(t, in.compositionChanged)
+			key := press(tc.key, tc.mods...)
+			mock.events = append([]ebiten.InputEvent{key, {Kind: ebiten.InputEventKindComposition, Source: key.Source}}, action(key, '글')[1:]...)
+			got := in.processEvents(nil)
+			require.Len(t, got, 2)
+			assert.Equal(t, '글', got[0].Ch)
+			assert.NotZero(t, got[1].Key)
+			assert.Empty(t, in.preedit.text)
+			assert.True(t, in.compositionChanged)
+			mock.events = nil
+			assert.Empty(t, in.processEvents(nil))
+			assert.False(t, in.compositionChanged)
+		})
+	}
+}
+
+func TestInputCompositionFocusAndModifiers(t *testing.T) {
+	mock, in := newTestInput(t)
+	mock.events = []ebiten.InputEvent{press(ebiten.KeyMetaLeft)}
+	in.processEvents(nil)
+	mock.events = []ebiten.InputEvent{{Kind: ebiten.InputEventKindComposition, Composition: "글"}}
+	require.Empty(t, in.processEvents(nil))
+	assert.True(t, in.metaHeld())
+	mock.unfocused = true
+	require.Empty(t, in.processEvents(nil))
+	assert.Empty(t, in.preedit.text)
+	assert.True(t, in.compositionChanged)
+	mock.unfocused = false
+	mock.events = nil
+	require.Empty(t, in.processEvents(nil))
+	assert.Empty(t, in.preedit.text)
+}
+
+func (m *mockInputManager) IsFocused() bool { return !m.unfocused }
+
+func TestInputCompositionKeepsNextSyllable(t *testing.T) {
+	mock, in := newTestInput(t)
+	key := press(ebiten.KeyR)
+	mock.events = []ebiten.InputEvent{
+		key,
+		{Kind: ebiten.InputEventKindComposition, Source: key.Source},
+		{Kind: ebiten.InputEventKindText, Rune: '한', NormalText: true, Source: key.Source},
+		{Kind: ebiten.InputEventKindComposition, Composition: "글", SelectionEnd: 3, Source: key.Source},
+	}
+	got := in.processEvents(nil)
+	require.Len(t, got, 1)
+	assert.Equal(t, '한', got[0].Ch)
+	assert.Equal(t, "글", in.preedit.text)
+	assert.Empty(t, in.claimed)
 }

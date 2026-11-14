@@ -26,6 +26,8 @@ github.com/akutz/memconn v0.1.0 h1:NawI0TORU4hcOMsMr11g7vwlCdkYeLKXBcxWu2W/P8A=
 github.com/akutz/memconn v0.1.0/go.mod h1:Jo8rI7m0NieZyLI5e2CDlRdRqRRB4S7Xp77ukDjH+Fw=
 github.com/alexbrainman/sspi v0.0.0-20231016080023-1a75b4708caa h1:LHTHcTQiSGT7VVbI0o4wBRNQIgn917usHWOd6VAffYI=
 github.com/alexbrainman/sspi v0.0.0-20231016080023-1a75b4708caa/go.mod h1:cEWa1LVoE5KvSD9ONXsZrj0z6KqySlCCNKHlLzbqAt4=
+github.com/anarcher/ebiten/v2 v2.7.6-0.20261114090653-35bfe787bdab h1:NkQx1EN8JRSGy0JBPbZexjUHKLMCIlfi1WsUgFiqKU0=
+github.com/anarcher/ebiten/v2 v2.7.6-0.20261114090653-35bfe787bdab/go.mod h1:ktenNSafDcraZPupfeBBts/GZ9uP9oDbB4IXMJweNwk=
 github.com/andybalholm/cascadia v1.3.2/go.mod h1:7gtRlve5FxPPgIgX36uWBX58OdBsSS6lUvCFb+h7KvU=
 github.com/andybalholm/cascadia v1.3.3 h1:AG2YHrzJIm4BZ19iwJ/DAua6Btl3IwJX+VI4kktS1LM=
 github.com/andybalholm/cascadia v1.3.3/go.mod h1:xNd9bqTn98Ln4DwST8/nG+H0yuB8Hmgu1YHNnWw0GeA=
@@ -511,8 +513,6 @@ github.com/unstablebuild/blue v1.85.2 h1:J2pBH6G1Y7twNU3CBuKsKZBGTDfqjFi/V9JUIYu
 github.com/unstablebuild/blue v1.85.2/go.mod h1:9yTwjlRwKO9rBPFiHCPb91jwM1GKf/+x5MJXS6tRN5I=
 github.com/unstablebuild/codesearch v1.4.0-ub.1 h1:ut6VtJjlZDatqoR/cg+x/ctYa4KXnWwwkuFM6wxz3pM=
 github.com/unstablebuild/codesearch v1.4.0-ub.1/go.mod h1:hKdpx7wOsvk2WLT/D6NLPxFeLT8jKCehZu21JpA2rIY=
-github.com/unstablebuild/ebiten/v2 v2.7.5-ub.34 h1:8kDMuA2qxq8iyF8tRw7COy7Y5fMDrmAjWC1YD19VaVc=
-github.com/unstablebuild/ebiten/v2 v2.7.5-ub.34/go.mod h1:ktenNSafDcraZPupfeBBts/GZ9uP9oDbB4IXMJweNwk=
 github.com/unstablebuild/go-billy/v6 v6.0.0-ub.1 h1:pPmxLsBLNuZv+LWeytIcvwzxeUAMYzeY2MDKmSWXMTA=
 github.com/unstablebuild/go-billy/v6 v6.0.0-ub.1/go.mod h1:E3VhlS+AKkrq6ZNn1axE2/nDRJ87l1FJk9r5HT2vPX0=
 github.com/unstablebuild/go-git/v6 v6.0.1-ub.1 h1:xBomYWGQkSIm023lhJxu+F1uU4YjZlIZaKpnm+7nIak=
